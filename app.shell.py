@@ -83,10 +83,6 @@ def main():
                                                       tokenizer=encodings,
                                                       token_threshold=4000,
                                                       verbose=True)
-
-            # generate LLM prompt
-            prompt = generate_prompt_series(query=query,
-                                            results=valid_response)
             
             # prep for streaming response
             st.subheader("Response from Impact Theory (context)")
@@ -96,14 +92,9 @@ def main():
                 chat_container, response_box = [], st.empty()
 
                 # execute chat call to LLM
-                #resp = llm.get_chat_completion(prompt=prompt,
-                #                                  system_message='answer this question based on the podcast material',
-                #                                  temperature=0,
-                #                                  max_tokens=500,
-                #                                  stream=False,
-                #                                  show_response=False)
-
-                resp = "Do not waste my time"
+                use_llm = True
+                resp = (get_answer(query, valid_response) if use_llm
+                        else  "Do not waste my time")
 
                 try:
                     # inserts chat stream from LLM
@@ -145,6 +136,20 @@ def main():
                     #            unsafe_allow_html=True)
 
                     st.image(image, caption=title.split('|')[0], width=200, use_column_width=False)
+
+
+def get_answer(query, valid_response):
+
+    # generate LLM prompt
+    prompt = generate_prompt_series(query=query,
+                                    results=valid_response)
+
+    return llm.get_chat_completion(prompt=prompt,
+                                   system_message='answer this question based on the podcast material',
+                                   temperature=0,
+                                   max_tokens=500,
+                                   stream=False,
+                                   show_response=False)
 
 if __name__ == '__main__':
     main()
